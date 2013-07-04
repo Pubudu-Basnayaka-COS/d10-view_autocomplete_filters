@@ -4,11 +4,14 @@
  * Integration with Views.
  */
 
-function views_autocomplete_filters_views_data_alter(&$data) {
-  foreach ($data as $data_type => $data_fields) {
-    foreach ($data_fields as $fieldname => $data_field) {
-      if (isset($data_field['filter']['handler']) && ($data_field['filter']['handler'] == 'views_handler_filter_string')) {
-          $data[$data_type][$fieldname]['filter']['handler'] = 'views_autocomplete_filters_handler_filter_string';
+/**
+ * Implements hook_views_data_alter().
+ */
+function views_autocomplete_filters_views_data_alter(array &$data) {
+  foreach ($data as $table_name => $table_data) {
+    foreach ($table_data as $field_name => $field_data) {
+      if (isset($field_data['filter']['id']) && $field_data['filter']['id'] == 'string') {
+        $data[$table_name][$field_name]['filter']['id'] = 'string_autocomplete';
       }
     }
   }
