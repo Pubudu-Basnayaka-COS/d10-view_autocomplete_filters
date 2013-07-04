@@ -36,12 +36,3 @@ function _views_autocomplete_filters_access_callback($view_name, $display_name) 
 
   return $view->access(array($display_name));
 }
-
-/**
- * Implements hook_views_api().
- */
-function views_autocomplete_filters_views_api() {
-  return array(
-    'api' => 3.0,
-  );
-}
