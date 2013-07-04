@@ -28,7 +28,7 @@ function views_autocomplete_filters_menu() {
 function _views_autocomplete_filters_access_callback($view_name, $display_name) {
   $view = views_get_view($view_name);
 
-  if (empty($view) || !$view->set_display($display_name)) {
+  if (empty($view) || !$view->setDisplay($display_name)) {
     // No such view or something is wrong with display
     // (no such display, broken handler, etc.)
     return FALSE;
