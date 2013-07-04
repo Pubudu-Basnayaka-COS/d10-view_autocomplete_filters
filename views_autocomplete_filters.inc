@@ -5,37 +5,42 @@
  * Common functions for Autocomplete Filters module.
  */
 
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 /**
  * Menu callback. Retrieves a pipe delimited string of autocomplete suggestions.
  */
 function views_autocomplete_filter($filter_name, $view_name, $display_name, $string = '') {
+  $string = Drupal::request()->query->get('q');
   if (trim($string) == '') {
     // Ignore empty strings.
-    return drupal_json_output(array());
+    return new JsonResponse(array());
   }
 
   // Get the view and set current display. The view and display were checked by
   // _views_autocomplete_filters_access_callback().
   $view = views_get_view($view_name);
-  $view->set_display($display_name);
+  $view->setDisplay($display_name);
 
   // Set display and display handler vars for quick access.
-  $display = $view->display[$display_name];
-  $display_handler = $display->handler;
+  //$display = $view->display[$display_name];
+  //$display_handler = $display->handler;
 
   // Get exposed filter options for our field.
   // Also, check if filter is exposed and autocomplete is enabled for this filter
   // (and if filter exists/exposed at all).
-  $filters = $display_handler->get_option('filters');
-  if (empty($filters[$filter_name]['exposed']) || empty($filters[$filter_name]['expose']['autocomplete_filter'])) {
+  $view->initHandlers();
+  $filters = $view->filter;
+
+  if (empty($filters[$filter_name]->options['exposed']) || empty($filters[$filter_name]->options['expose']['autocomplete_filter'])) {
     return drupal_not_found();
   }
-  $expose_options = $filters[$filter_name]['expose'];
+  $expose_options = $filters[$filter_name]->options['expose'];
 
   // Determine field which will be used for output.
   if (empty($expose_options['autocomplete_field'])) {
-    if ($view->get_item($display_name, 'field', $filters[$filter_name]['id'])) {
-      $field_name = $filters[$filter_name]['id'];
+    if ($view->getItem($display_name, 'field', $filters[$filter_name]->options['id'])) {
+      $field_name = $filters[$filter_name]->options['id'];
       // force raw data for no autocomplete field defined.
       $expose_options['autocomplete_raw_suggestion'] = 1;
       $expose_options['autocomplete_raw_dropdown'] = 1;
@@ -47,7 +52,7 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
         '%view' => $view->name,
         '%display' => $display->id,
       ), WATCHDOG_ERROR);
-      return drupal_json_output(array());
+      return new JsonResponse(array());
     }
   }
   else {
@@ -55,7 +60,7 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
   }
 
   // Get field options and check field exists in this display.
-  $field_options = $view->get_item($display_name, 'field', $field_name);
+  $field_options = $view->field[$field_name];
   if (empty($field_options)) {
     // Field not exists, report about it to watchdog and return empty array.
     watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label not exists in view %view, display %display', array(
@@ -63,7 +68,7 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
       '%view' => $view->name,
       '%display' => $display->id,
     ), WATCHDOG_ERROR);
-    return drupal_json_output(array());
+    return new JsonResponse(array());
   }
 
   // Collect exposed filter values and set them to the view.
@@ -74,10 +79,10 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
     $exposed_input = array();
   }
   $exposed_input[$expose_options['identifier']] = $string;
-  $view->set_exposed_input($exposed_input);
+  $view->setExposedInput($exposed_input);
 
   // Disable cache for view, because caching autocomplete is a waste of time and memory.
-  $display_handler->set_option('cache', array('type' => 'none'));
+  $view->display_handler->overrideOption('cache', array('type' => 'none'));
 
   // Force limit for results.
   if (empty($expose_options['autocomplete_items'])) {
@@ -95,13 +100,13 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
       ),
     );
   }
-  $display_handler->set_option('pager', $pager);
+  $view->display_handler->setOption('pager', $pager);
 
   // Execute view query.
-  $view->pre_execute();
+  $view->preExecute();
   $view->execute($view->current_display);
-  $view->post_execute();
-
+  $view->postExecute();
+  
   // Render field on each row and fill matches array.
   $use_raw_suggestion = !empty($expose_options['autocomplete_raw_suggestion']);
   $use_raw_dropdown = !empty($expose_options['autocomplete_raw_dropdown']);
@@ -111,14 +116,14 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
   foreach ($view->result as $index => $row) {
     $view->row_index = $index;
     $rendered_field = $raw_field = '';
-
+    $rendered_field = $view->style_plugin->getField($index, $field_name);
     // Render field only if suggestion or dropdown item not in RAW format.
     if (!$use_raw_suggestion || !$use_raw_dropdown) {
-      $rendered_field = $view->style_plugin->get_field($index, $field_name);
+      $rendered_field = $view->style_plugin->getField($index, $field_name);
     }
     // Get the raw field value only if suggestion or dropdown item is in RAW format.
     if ($use_raw_suggestion || $use_raw_dropdown) {
-      $raw_field = $view->style_plugin->get_field_value($index, $field_name);
+      $raw_field = $view->field[$field_name]->getValue($view->result[$index]);
       if (!is_array($raw_field)) {
         $raw_field = array(array('value' => $raw_field));
       }
@@ -147,5 +152,5 @@ function views_autocomplete_filter($filter_name, $view_name, $display_name, $str
     $matches[''] = '<div class="reference-autocomplete">' . t('The %string return no results. Please try something else.', array('%string' => $string)) . '</div>';
   }
 
-  return drupal_json_output($matches);
+  return new JsonResponse($matches);
 }
