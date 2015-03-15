@@ -2,13 +2,14 @@
 
 /**
  * @file
- * Definition of Drupal\views_autocomplete_filters\Plugin\views\filter\String.
+ * Definition of Drupal\views_autocomplete_filters\Plugin\views\filter\ViewsAutocompleteFiltersString.
  */
 
 namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 
+use Drupal\Component\Utility\String as UtilityString;
 use Drupal\Core\Database\Database;
-use Drupal\Component\Annotation\PluginID;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\filter\String;
 
 /**
@@ -17,12 +18,12 @@ use Drupal\views\Plugin\views\filter\String;
  *
  * @ingroup views_filter_handlers
  *
- * @PluginID("string_autocomplete")
+ * @ViewsFilter("views_autocomplete_filters_string")
  */
-class StringAutocomplete extends String {
+class ViewsAutocompleteFiltersString extends String {
 
   // exposed filter options
-  var $always_multiple = TRUE;
+  var $alwaysMultiple = TRUE;
 
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -36,59 +37,55 @@ class StringAutocomplete extends String {
       'autocomplete_raw_dropdown' => array('default' => TRUE),
       'autocomplete_dependent' => array('default' => FALSE),
     );
-    
+
     return $options;
   }
 
   /**
    * Build the options form.
    */
-  public function buildOptionsForm(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    if ($this->canExpose()) {
-      /*
-      $field_options_all = $this->view->display_handler->get_field_labels();
-      // limit options to fields with the same name
-      foreach ($this->view->display_handler->get_handlers('field') as $id => $handler) {
+    if ($this->canExpose() && !empty($form['expose'])) {
+      $field_options_all = $this->view->display_handler->getFieldLabels();
+      // Limit options to fields with the same name.
+      foreach ($this->view->display_handler->getHandlers('field') as $id => $handler) {
         if ($handler->real_field == $this->real_field) {
           $field_options[$id] = $field_options_all[$id];
         }
       }
       if (empty($field_options)) {
-        $field_options[''] = t('<Add some fields to view>');
+        $field_options[''] = $this->t('<Add some fields to view>');
       }
       elseif (empty($this->options['expose']['autocomplete_field']) && !empty($field_options[$this->options['id']])) {
         $this->options['expose']['autocomplete_field'] = $this->options['id'];
       }
-      */
 
       // Build form elements for the right side of the exposed filter form
       $form['expose'] += array(
         'autocomplete_filter' => array(
           '#type' => 'checkbox',
-          '#title' => t('Use Autocomplete'),
+          '#title' => $this->t('Use Autocomplete'),
           '#default_value' => $this->options['expose']['autocomplete_filter'],
-          '#description' => t('Use Autocomplete for this filter.'),
+          '#description' => $this->t('Use Autocomplete for this filter.'),
         ),
-        /*
         'autocomplete_items' => array(
           '#type' => 'textfield',
-          '#title' => t('Maximum number of items in Autocomplete'),
+          '#title' => $this->t('Maximum number of items in Autocomplete'),
           '#default_value' => $this->options['expose']['autocomplete_items'],
-          '#description' => t('Enter 0 for no limit.'),
+          '#description' => $this->t('Enter 0 for no limit.'),
           '#states' => array(
             'visible' => array('
               :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
             ),
           ),
         ),
-        /*
         'autocomplete_dependent' => array(
           '#type' => 'checkbox',
-          '#title' => t('Suggestions depend on other filter fields'),
+          '#title' => $this->t('Suggestions depend on other filter fields'),
           '#default_value' => $this->options['expose']['autocomplete_dependent'],
-          '#description' => t('Autocomplete suggestions will be filtered by other filter fields'),
+          '#description' => $this->t('Autocomplete suggestions will be filtered by other filter fields'),
           '#states' => array(
             'visible' => array('
               :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
@@ -97,10 +94,10 @@ class StringAutocomplete extends String {
         ),
         'autocomplete_field' => array(
           '#type' => 'select',
-          '#title' => t('Field with autocomplete results'),
+          '#title' => $this->t('Field with autocomplete results'),
           '#default_value' => $this->options['expose']['autocomplete_field'],
           '#options' => $field_options,
-          '#description' => t('Selected field will be used for dropdown results of autocomplete. In most cases it should be the same field you use for filter.'),
+          '#description' => $this->t('Selected field will be used for dropdown results of autocomplete. In most cases it should be the same field you use for filter.'),
           '#states' => array(
             'visible' => array('
               :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
@@ -109,9 +106,9 @@ class StringAutocomplete extends String {
         ),
         'autocomplete_raw_dropdown' => array(
           '#type' => 'checkbox',
-          '#title' => t('Unformatted dropdown'),
+          '#title' => $this->t('Unformatted dropdown'),
           '#default_value' => $this->options['expose']['autocomplete_raw_dropdown'],
-          '#description' => t('Use unformatted data from database for dropdown list instead of field formatter result. Value will be printed as plain text.'),
+          '#description' => $this->t('Use unformatted data from database for dropdown list instead of field formatter result. Value will be printed as plain text.'),
           '#states' => array(
             'visible' => array('
               :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
@@ -120,35 +117,34 @@ class StringAutocomplete extends String {
         ),
         'autocomplete_raw_suggestion' => array(
           '#type' => 'checkbox',
-          '#title' => t('Unformatted suggestion'),
+          '#title' => $this->t('Unformatted suggestion'),
           '#default_value' => $this->options['expose']['autocomplete_raw_suggestion'],
-          '#description' => t('The same as above, but for suggestion (text appearing inside textfield when item is selected).'),
+          '#description' => $this->t('The same as above, but for suggestion (text appearing inside textfield when item is selected).'),
           '#states' => array(
             'visible' => array('
               :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
             ),
           ),
         ),
-        */
       );
     }
   }
 
-  public function valueForm(&$form, &$form_state) {
+  public function valueForm(&$form, FormStateInterface $form_state) {
     parent::valueForm($form, $form_state);
-    if (empty($form_state['exposed']) || empty($this->options['expose']['autocomplete_filter'])) {
+    if (empty($form_state->exposed) || empty($this->options['expose']['autocomplete_filter'])) {
       // It's not an exposed form or autocomplete is not enabled.
       return;
     }
-    
+
     if (empty($form['value']['#type']) || $form['value']['#type'] !== 'textfield') {
       // Not a textfield.
       return;
     }
-    
+
     // Add autocomplete path to the exposed textfield.
     $form['value']['#autocomplete_path'] = 'autocomplete_filter/' . $this->options['id'] . '/' . $this->view->storage->id . '/' . $this->view->current_display;
-    
+
     // Add JS script with core autocomplete overrides to the end of JS files
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
     // mark the field with special class.
@@ -161,4 +157,5 @@ class StringAutocomplete extends String {
       $form['value']['#attributes']['class'][] = 'views-ac-dependent-filter';
     }
   }
+
 }
