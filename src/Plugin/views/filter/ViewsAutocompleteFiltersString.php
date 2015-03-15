@@ -132,7 +132,8 @@ class ViewsAutocompleteFiltersString extends String {
 
   public function valueForm(&$form, FormStateInterface $form_state) {
     parent::valueForm($form, $form_state);
-    if (empty($form_state->exposed) || empty($this->options['expose']['autocomplete_filter'])) {
+    $exposed = $form_state->get('exposed');
+    if (!$exposed || empty($this->options['expose']['autocomplete_filter'])) {
       // It's not an exposed form or autocomplete is not enabled.
       return;
     }
@@ -143,7 +144,7 @@ class ViewsAutocompleteFiltersString extends String {
     }
 
     // Add autocomplete path to the exposed textfield.
-    $form['value']['#autocomplete_path'] = 'autocomplete_filter/' . $this->options['id'] . '/' . $this->view->storage->id . '/' . $this->view->current_display;
+    $form['value']['#autocomplete_path'] = 'autocomplete_filter/' . $this->options['id'] . '/' . $this->view->storage->get('id') . '/' . $this->view->current_display;
 
     // Add JS script with core autocomplete overrides to the end of JS files
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
