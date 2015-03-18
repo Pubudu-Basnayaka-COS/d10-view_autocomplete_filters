@@ -31,6 +31,7 @@ class ViewsAutocompleteFiltersString extends String {
     $options['expose']['contains']['required'] = array('default' => FALSE, 'bool' => TRUE);
     $options['expose']['contains'] += array(
       'autocomplete_filter' => array('default' => 0),
+      'autocomplete_min_chars' => array('default' => 0),
       'autocomplete_items' => array('default' => 10),
       'autocomplete_field' => array('default' => ''),
       'autocomplete_raw_suggestion' => array('default' => TRUE),
@@ -51,7 +52,7 @@ class ViewsAutocompleteFiltersString extends String {
       $field_options_all = $this->view->display_handler->getFieldLabels();
       // Limit options to fields with the same name.
       foreach ($this->view->display_handler->getHandlers('field') as $id => $handler) {
-        if ($handler->real_field == $this->real_field) {
+        if ($handler->realField == $this->realField) {
           $field_options[$id] = $field_options_all[$id];
         }
       }
@@ -144,7 +145,11 @@ class ViewsAutocompleteFiltersString extends String {
     }
 
     // Add autocomplete path to the exposed textfield.
-    $form['value']['#autocomplete_path'] = 'autocomplete_filter/' . $this->options['id'] . '/' . $this->view->storage->get('id') . '/' . $this->view->current_display;
+    $form['value']['#autocomplete_path'] = 'views-autocomplete-filter/' . $this->view->storage->get('id') . '/' . $this->view->current_display . '/' . $this->options['id'];
+    //attach_configuration_to_element($element, $element['#autocomplete_configuration']);
+    $form['value']['#attributes']['class'][] = 'form-autocomplete';
+    $form['value']['#attached']['library'][] = 'core/drupal.autocomplete';
+    //$form['value']['#attributes']['data-key'] = $element['#autocomplete_configuration'];
 
     // Add JS script with core autocomplete overrides to the end of JS files
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
