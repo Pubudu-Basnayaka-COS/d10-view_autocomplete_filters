@@ -215,7 +215,10 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
               $suggestion = String::decodeEntities($suggestion);
 
               // Add a class wrapper for a few required CSS overrides.
-              $matches[$suggestion] = '<div class="reference-autocomplete">' . $dropdown . '</div>';
+              $matches[] = array(
+                'value' => $suggestion,
+                'label' => '<div class="reference-autocomplete">' . $dropdown . '</div>',
+              );
             }
           }
         }
