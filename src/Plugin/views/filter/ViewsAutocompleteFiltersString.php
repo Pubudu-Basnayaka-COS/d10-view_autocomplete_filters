@@ -145,15 +145,18 @@ class ViewsAutocompleteFiltersString extends String {
     }
 
     // Add autocomplete path to the exposed textfield.
-    $form['value']['#autocomplete_path'] = 'views-autocomplete-filter/' . $this->view->storage->get('id') . '/' . $this->view->current_display . '/' . $this->options['id'];
-    //attach_configuration_to_element($element, $element['#autocomplete_configuration']);
-    $form['value']['#attributes']['class'][] = 'form-autocomplete';
-    $form['value']['#attached']['library'][] = 'core/drupal.autocomplete';
-    //$form['value']['#attributes']['data-key'] = $element['#autocomplete_configuration'];
+    $form['value']['#autocomplete_route_name'] = 'viewsfilters.autocomplete';
+    $form['value']['#autocomplete_route_parameters'] = array(
+      'view_name' => $this->view->storage->get('id'),
+      'view_display' => $this->view->current_display,
+      'filter_name' => $this->options['id'],
+      'view_args' => 'null',
+    );
 
     // Add JS script with core autocomplete overrides to the end of JS files
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
     // mark the field with special class.
+    /*
     if (!empty($this->options['expose']['autocomplete_dependent'])) {
       $file_path = drupal_get_path('module', 'views_autocomplete_filters') . '/js/views-autocomplete-filters-dependent.js';
       drupal_add_js($file_path, array(
@@ -162,6 +165,7 @@ class ViewsAutocompleteFiltersString extends String {
 
       $form['value']['#attributes']['class'][] = 'views-ac-dependent-filter';
     }
+    */
   }
 
 }

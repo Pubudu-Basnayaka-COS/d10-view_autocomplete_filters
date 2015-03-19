@@ -52,10 +52,14 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
-   * @param string $entity_type
-   *   The entity_type.
-   * @param string $field_name
-   *   The name of the term reference field.
+   * @param string $view_name
+   *   The View name.
+   * @param string $view_name
+   *   The View name.
+   * @param string $filter_name
+   *   The string filter identifier field.
+   * @param string $view_args
+   *   The View arguments, contextual filters.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
    *   When valid field name is specified, a JSON response containing the
@@ -66,8 +70,6 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     $matches = array();
     $string = $request->query->get('q');
     // Get view and execute.
-    $view_name = 'xxx';
-    $view_display = 'page_1';
     $view = Views::getView($view_name);
     $view->setDisplay($view_display);
     if (!empty($view_args)) {
@@ -101,7 +103,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     // Do not filter if the string length is less that minimum characters setting.
     if (strlen(trim($string)) < $exposeOptions['autocomplete_min_chars']) {
       $matches[''] = '<div class="reference-autocomplete">' . t('The %string should have at least %min_chars characters.', array('%string' => $string, '%min_chars' => $exposeOptions['autocomplete_min_chars'])) . '</div>';
-      return drupal_json_output($matches);
+      return new JsonResponse($matches);
     }
 
     // Determine fields which will be used for output.
@@ -188,12 +190,11 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       $view->row_index = $index;
       $rendered_field = $raw_field = '';
       $stylePluginBase = $display_handler->getPlugin('style');
-      //print_r($stylePluginBase);
   
       foreach ($field_names as $field_name) {
         // Render field only if suggestion or dropdown item not in RAW format.
         if (!$useRawSuggestion || !$useRawDropdown) {
-          $rendered_field = $view->StylePluginBase->getField($index, $field_name);
+          $rendered_field = $stylePluginBase->getField($index, $field_name);
         }
         // Get the raw field value only if suggestion or dropdown item is in RAW format.
         if ($useRawSuggestion || $useRawDropdown) {
