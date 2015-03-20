@@ -77,47 +77,47 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
     // Set display and display handler vars for quick access.
     //$display = $view->display[$view_display];
-    $displayHandler = $view->display_handler;
+    $display_handler = $view->display_handler;
   
     // Force "Display all values" for arguments set,
     // to get results no matter of Not Contextual filter present settings.
-    $arguments = $displayHandler->getOption('arguments');
+    $arguments = $display_handler->getOption('arguments');
     if (!empty($arguments)) {
       foreach ($arguments as $k => $argument) {
         $arguments[$k]['default_action'] = 'ignore';
       }
-      $displayHandler->setOption('arguments', $arguments);
+      $display_handler->setOption('arguments', $arguments);
     }
     $matches = $view->result;
 
     // Get exposed filter options for our field.
     // Also, check if filter is exposed and autocomplete is enabled for this
     // filter (and if filter exists/exposed at all).
-    $filters = $displayHandler->getOption('filters');
+    $filters = $display_handler->getOption('filters');
     if (empty($filters[$filter_name]['exposed']) || empty($filters[$filter_name]['expose']['autocomplete_filter'])) {
       throw new NotFoundHttpException();
     }
     $filter = $filters[$filter_name];
-    $exposeOptions = $filter['expose'];
+    $expose_options = $filter['expose'];
 
     // Do not filter if the string length is less that minimum characters setting.
-    if (strlen(trim($string)) < $exposeOptions['autocomplete_min_chars']) {
-      $matches[''] = '<div class="reference-autocomplete">' . t('The %string should have at least %min_chars characters.', array('%string' => $string, '%min_chars' => $exposeOptions['autocomplete_min_chars'])) . '</div>';
+    if (strlen(trim($string)) < $expose_options['autocomplete_min_chars']) {
+      $matches[''] = '<div class="reference-autocomplete">' . t('The %string should have at least %min_chars characters.', array('%string' => $string, '%min_chars' => $expose_options['autocomplete_min_chars'])) . '</div>';
       return new JsonResponse($matches);
     }
 
     // Determine fields which will be used for output.
-    if (empty($exposeOptions['autocomplete_field']) && !empty($filter['name']) ) {
+    if (empty($expose_options['autocomplete_field']) && !empty($filter['name']) ) {
       if ($view->getHandler($display_name, 'field', $filters[$filter_name]['id'])) {
         $field_names = array([$filter_name]['id']);
         // force raw data for no autocomplete field defined.
-        $exposeOptions['autocomplete_raw_suggestion'] = 1;
-        $exposeOptions['autocomplete_raw_dropdown'] = 1;
+        $expose_options['autocomplete_raw_suggestion'] = 1;
+        $expose_options['autocomplete_raw_dropdown'] = 1;
       }
       else {
         // Field is not set, report about it to watchdog and return empty array.
         watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label is not set in view %view, display %display', array(
-          '%label' => $exposeOptions['label'],
+          '%label' => $expose_options['label'],
           '%view' => $view->name,
           '%display' => $display->id,
         ), WATCHDOG_ERROR);
@@ -125,8 +125,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       }
     }
     // Text field autocomplete filter.
-    elseif (!empty($exposeOptions['autocomplete_field'])) {
-      $field_names = array($exposeOptions['autocomplete_field']);
+    elseif (!empty($expose_options['autocomplete_field'])) {
+      $field_names = array($expose_options['autocomplete_field']);
     }
     // For combine fields autocomplete filter.
     elseif (!empty($filter['fields'])) {
@@ -139,7 +139,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       if (empty($fieldOptions)) {
         // Field not exists, report about it to watchdog and return empty array.
         watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label not exists in view %view, display %display', array(
-          '%label' => $exposeOptions['label'],
+          '%label' => $expose_options['label'],
           '%view' => $view->name,
           '%display' => $display->id,
         ), WATCHDOG_ERROR);
@@ -147,20 +147,20 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       }
     }
     // Collect exposed filter values and set them to the view.
-    if (!empty($exposeOptions['autocomplete_dependent'])) {
+    if (!empty($expose_options['autocomplete_dependent'])) {
       $exposedInput = $view->getExposedInput() ;
     }
     else {
       $exposedInput = array();
     }
-    $exposedInput[$exposeOptions['identifier']] = $string;
+    $exposedInput[$expose_options['identifier']] = $string;
     $view->setExposedInput($exposedInput);
 
     // Disable cache for view, because caching autocomplete is a waste of time and memory.
-    $displayHandler->setOption('cache', array('type' => 'none'));
+    $display_handler->setOption('cache', array('type' => 'none'));
 
     // Force limit for results.
-    if (empty($exposeOptions['autocomplete_items'])) {
+    if (empty($expose_options['autocomplete_items'])) {
       $pager_type = 'none';
     }
     else {
@@ -169,11 +169,11 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     $pager = array(
       'type' => $pager_type,
       'options' => array(
-        'items_per_page' => $exposeOptions['autocomplete_items'],
+        'items_per_page' => $expose_options['autocomplete_items'],
         'offset' => 0,
       ),
     );
-    $displayHandler->setOption('pager', $pager);
+    $display_handler->setOption('pager', $pager);
 
     // Execute view query.
     $view->preExecute();
@@ -182,23 +182,23 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     $display_handler = $view->display_handler;
   
     // Render field on each row and fill matches array.
-    $useRawSuggestion = !empty($exposeOptions['autocomplete_raw_suggestion']);
-    $useRawDropdown = !empty($exposeOptions['autocomplete_raw_dropdown']);
+    $use_raw_suggestion = !empty($expose_options['autocomplete_raw_suggestion']);
+    $use_raw_dropdown = !empty($expose_options['autocomplete_raw_dropdown']);
 
     $view->row_index = 0;
     foreach ($view->result as $index => $row) {
       $view->row_index = $index;
       $rendered_field = $raw_field = '';
-      $stylePluginBase = $display_handler->getPlugin('style');
+      $style_plugin = $display_handler->getPlugin('style');
   
       foreach ($field_names as $field_name) {
         // Render field only if suggestion or dropdown item not in RAW format.
-        if (!$useRawSuggestion || !$useRawDropdown) {
-          $rendered_field = $stylePluginBase->getField($index, $field_name);
+        if (!$use_raw_suggestion || !$use_raw_dropdown) {
+          $rendered_field = $style_plugin->getField($index, $field_name);
         }
         // Get the raw field value only if suggestion or dropdown item is in RAW format.
-        if ($useRawSuggestion || $useRawDropdown) {
-          $raw_field = $stylePluginBase->getFieldValue($index, $field_name);
+        if ($use_raw_suggestion || $use_raw_dropdown) {
+          $raw_field = $style_plugin->getFieldValue($index, $field_name);
           if (!is_array($raw_field)) {
             $raw_field = array(array('value' => $raw_field));
           }
@@ -209,15 +209,15 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
         }
         foreach ($raw_field as $delta => $item) {
           if (isset($item['value']) && strstr(Unicode::strtolower($item['value']), Unicode::strtolower($string))) {
-            $dropdown = $useRawDropdown ? String::checkPlain($item['value']) : $rendered_field;
+            $dropdown = $use_raw_dropdown ? String::checkPlain($item['value']) : $rendered_field;
             if ($dropdown != '') {
-              $suggestion = $useRawSuggestion ? String::checkPlain($item['value']) : $rendered_field;
+              $suggestion = $use_raw_suggestion ? String::checkPlain($item['value']) : $rendered_field;
               $suggestion = String::decodeEntities($suggestion);
 
               // Add a class wrapper for a few required CSS overrides.
               $matches[] = array(
                 'value' => $suggestion,
-                'label' => '<div class="reference-autocomplete">' . $dropdown . '</div>',
+                'label' => $dropdown,
               );
             }
           }
@@ -227,7 +227,10 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     unset($view->row_index);
 
     if (empty($matches)) {
-      $matches[''] = '<div class="reference-autocomplete">' . t('The %string return no results. Please try something else.', array('%string' => $string)) . '</div>';
+      $matches[] = array(
+        'value' => '',
+        'label' => t('The %string return no results. Please try something else.', array('%string' => $string)),
+      );
     }
 
     return new JsonResponse($matches);
