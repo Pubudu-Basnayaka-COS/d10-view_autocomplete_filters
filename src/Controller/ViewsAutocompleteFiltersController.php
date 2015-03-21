@@ -25,10 +25,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity.query')->get('taxonomy_term'),
-      $container->get('entity.manager')
-    );
+    return new static();
   }
 
   /**
@@ -102,7 +99,12 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
 
     // Do not filter if the string length is less that minimum characters setting.
     if (strlen(trim($string)) < $expose_options['autocomplete_min_chars']) {
-      $matches[''] = '<div class="reference-autocomplete">' . t('The %string should have at least %min_chars characters.', array('%string' => $string, '%min_chars' => $expose_options['autocomplete_min_chars'])) . '</div>';
+      /*
+      $matches[] = array(
+        'value' => '',
+        'label' => t('"@string" must have at least %min_chars characters.', array('@string' => $string, '%min_chars' => $expose_options['autocomplete_min_chars'])),
+      );
+      */
       return new JsonResponse($matches);
     }
 
@@ -229,7 +231,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     if (empty($matches)) {
       $matches[] = array(
         'value' => '',
-        'label' => t('The %string return no results. Please try something else.', array('%string' => $string)),
+        'label' => t('"@string" returned no results. Please try something else.', array('@string' => $string)),
       );
     }
 

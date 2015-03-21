@@ -10,7 +10,7 @@ namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 use Drupal\Component\Utility\String as UtilityString;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\views\filter\String;
+use Drupal\views\Plugin\views\filter\Combine;
 
 /**
  * Basic textfield filter to handle string filtering commands
@@ -18,9 +18,9 @@ use Drupal\views\Plugin\views\filter\String;
  *
  * @ingroup views_filter_handlers
  *
- * @ViewsFilter("views_autocomplete_filters_string")
+ * @ViewsFilter("views_autocomplete_filters_combine")
  */
-class ViewsAutocompleteFiltersString extends String {
+class ViewsAutocompleteFiltersCombine extends Combine {
 
   // exposed filter options
   var $alwaysMultiple = TRUE;
@@ -33,7 +33,6 @@ class ViewsAutocompleteFiltersString extends String {
       'autocomplete_filter' => array('default' => 0),
       'autocomplete_min_chars' => array('default' => 0),
       'autocomplete_items' => array('default' => 10),
-      'autocomplete_field' => array('default' => ''),
       'autocomplete_raw_suggestion' => array('default' => TRUE),
       'autocomplete_raw_dropdown' => array('default' => TRUE),
       'autocomplete_dependent' => array('default' => FALSE),
@@ -59,9 +58,6 @@ class ViewsAutocompleteFiltersString extends String {
       if (empty($field_options)) {
         $field_options[''] = $this->t('Add some fields to view');
       }
-      elseif (empty($this->options['expose']['autocomplete_field']) && !empty($field_options[$this->options['id']])) {
-        $this->options['expose']['autocomplete_field'] = $this->options['id'];
-      }
 
       // Build form elements for the right side of the exposed filter form
       $states = array(
@@ -83,26 +79,11 @@ class ViewsAutocompleteFiltersString extends String {
           '#description' => $this->t('Enter 0 for no limit.'),
           '#states' => $states,
         ),
-        'autocomplete_min_chars' => array(
-          '#type' => 'textfield',
-          '#title' => t('Minimum number of characters to start filter'),
-          '#default_value' => $this->options['expose']['autocomplete_min_chars'],
-          '#element_validate' => array('element_validate_integer'),
-          '#states' => $states,
-        ),
         'autocomplete_dependent' => array(
           '#type' => 'checkbox',
           '#title' => $this->t('Suggestions depend on other filter fields'),
           '#default_value' => $this->options['expose']['autocomplete_dependent'],
           '#description' => $this->t('Autocomplete suggestions will be filtered by other filter fields'),
-          '#states' => $states,
-        ),
-        'autocomplete_field' => array(
-          '#type' => 'select',
-          '#title' => $this->t('Field with autocomplete results'),
-          '#default_value' => $this->options['expose']['autocomplete_field'],
-          '#options' => $field_options,
-          '#description' => $this->t('Selected field will be used for dropdown results of autocomplete. In most cases it should be the same field you use for filter.'),
           '#states' => $states,
         ),
         'autocomplete_raw_dropdown' => array(
@@ -127,7 +108,7 @@ class ViewsAutocompleteFiltersString extends String {
     parent::valueForm($form, $form_state);
     $exposed = $form_state->get('exposed');
     if (!$exposed || empty($this->options['expose']['autocomplete_filter'])) {
-      // It's not an exposed form or autocomplete is not enabled.
+      // It is not an exposed form or autocomplete is not enabled.
       return;
     }
 
