@@ -2,19 +2,17 @@
 
 /**
  * @file
- * Definition of Drupal\views_autocomplete_filters\Plugin\views\filter\ViewsAutocompleteFiltersString.
+ * Definition of Drupal\views_autocomplete_filters\Plugin\views\filter\ViewsAutocompleteFiltersCombine.
  */
 
 namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 
-use Drupal\Component\Utility\String as UtilityString;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\filter\Combine;
 
 /**
- * Basic textfield filter to handle string filtering commands
- * including equality, like, not like, etc.
+ * Autocomplete for Combine fields filter which allows to search on multiple
+ * fields.
  *
  * @ingroup views_filter_handlers
  *

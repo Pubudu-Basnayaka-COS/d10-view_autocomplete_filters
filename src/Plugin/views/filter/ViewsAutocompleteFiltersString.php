@@ -7,13 +7,11 @@
 
 namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 
-use Drupal\Component\Utility\String as UtilityString;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\filter\String;
 
 /**
- * Basic textfield filter to handle string filtering commands
+ * Autocomplete for basic textfield filter to handle string filtering commands
  * including equality, like, not like, etc.
  *
  * @ingroup views_filter_handlers
@@ -127,7 +125,7 @@ class ViewsAutocompleteFiltersString extends String {
     parent::valueForm($form, $form_state);
     $exposed = $form_state->get('exposed');
     if (!$exposed || empty($this->options['expose']['autocomplete_filter'])) {
-      // It's not an exposed form or autocomplete is not enabled.
+      // It is not an exposed form or autocomplete is not enabled.
       return;
     }
 
