@@ -3,4 +3,4 @@ viewsfilters.autocomplete:
   defaults:
     _controller: '\Drupal\views_autocomplete_filters\Controller\ViewsAutocompleteFiltersController::autocomplete'
   requirements:
-    _permission: 'access content'
+    _custom_access:  '\Drupal\views_autocomplete_filters\Controller\ViewsAutocompleteFiltersController::access'

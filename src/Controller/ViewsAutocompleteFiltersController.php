@@ -10,6 +10,7 @@ namespace Drupal\views_autocomplete_filters\Controller;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,30 +31,40 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
   }
 
   /**
+   * Access for the autocomplete filters path.
+   *
+   * Determine if the given user has access to the view. Note that
+   * this sets the display handler if it hasn't been.
+   *
+   * @param string $view_name
+   *   The View name.
+   * @param string $view_display
+   *   The View display.
+   *
+   * @return bool.
+   */
+  public function access($view_name, $view_display) {
+    // Determine if the given user has access to the view. Note that
+    // this sets the display handler if it hasn't been.
+    $view = Views::getView($view_name);
+    if ($view->access($view_display)) {
+      return AccessResult::allowed();
+    }
+    return AccessResult::forbidden();
+  }
+    /**
    * Retrieves suggestions for taxonomy term autocompletion.
    *
-   * This function outputs term name suggestions in response to Ajax requests
-   * made by the taxonomy autocomplete widget for taxonomy term reference
-   * fields. The output is a JSON object of plain-text term suggestions, keyed
-   * by the user-entered value with the completed term name appended.
-   * Term names containing commas are wrapped in quotes.
-   *
-   * For example, suppose the user has entered the string 'red fish, blue' in
-   * the field, and there are two taxonomy terms, 'blue fish' and 'blue moon'.
-   * The JSON output would have the following structure:
-   * @code
-   *   {
-   *     "red fish, blue fish": "blue fish",
-   *     "red fish, blue moon": "blue moon",
-   *   };
-   * @endcode
+   * This function outputs text suggestions in response to Ajax requests
+   * made by the String filter with autocomplete.
+   * The output is a JSON object of suggestions found.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    * @param string $view_name
    *   The View name.
-   * @param string $view_name
-   *   The View name.
+   * @param string $view_display
+   *   The View display.
    * @param string $filter_name
    *   The string filter identifier field.
    * @param string $view_args
@@ -61,8 +72,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
    *   When valid field name is specified, a JSON response containing the
-   *   autocomplete suggestions for taxonomy terms. Otherwise a normal response
-   *   containing an error message.
+   *   autocomplete suggestions for searched strings. Otherwise a normal response
+   *   containing a failure message.
    */
   public function autocomplete(Request $request, $view_name, $view_display, $filter_name, $view_args) {
     $matches = array();
