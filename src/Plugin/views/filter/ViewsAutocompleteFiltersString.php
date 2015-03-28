@@ -8,7 +8,7 @@
 namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\views\filter\String;
+use Drupal\views\Plugin\views\filter\StringFilter;
 
 /**
  * Autocomplete for basic textfield filter to handle string filtering commands
@@ -18,7 +18,7 @@ use Drupal\views\Plugin\views\filter\String;
  *
  * @ViewsFilter("views_autocomplete_filters_string")
  */
-class ViewsAutocompleteFiltersString extends String {
+class ViewsAutocompleteFiltersString extends StringFilter {
 
   // exposed filter options
   var $alwaysMultiple = TRUE;
