@@ -77,6 +77,13 @@ class ViewsAutocompleteFiltersCombine extends Combine {
           '#description' => $this->t('Enter 0 for no limit.'),
           '#states' => $states,
         ),
+        'autocomplete_min_chars' => array(
+          '#type' => 'textfield',
+          '#title' => t('Minimum number of characters to start filter'),
+          '#default_value' => $this->options['expose']['autocomplete_min_chars'],
+          '#element_validate' => array('element_validate_integer'),
+          '#states' => $states,
+        ),
         'autocomplete_dependent' => array(
           '#type' => 'checkbox',
           '#title' => $this->t('Suggestions depend on other filter fields'),
