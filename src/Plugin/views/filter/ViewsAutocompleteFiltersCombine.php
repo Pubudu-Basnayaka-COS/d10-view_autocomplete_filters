@@ -20,7 +20,7 @@ use Drupal\views\Plugin\views\filter\Combine;
  */
 class ViewsAutocompleteFiltersCombine extends Combine {
 
-  // exposed filter options
+  // Exposed filter options.
   var $alwaysMultiple = TRUE;
 
   protected function defineOptions() {

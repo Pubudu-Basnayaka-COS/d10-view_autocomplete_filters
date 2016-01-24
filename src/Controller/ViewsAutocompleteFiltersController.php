@@ -84,7 +84,6 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       $view->setArguments(explode('||', $view_args));
     }
     // Set display and display handler vars for quick access.
-    //$display = $view->display[$view_display];
     $display_handler = $view->display_handler;
   
     // Force "Display all values" for arguments set,
@@ -110,12 +109,6 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
 
     // Do not filter if the string length is less that minimum characters setting.
     if (strlen(trim($string)) < $expose_options['autocomplete_min_chars']) {
-      /*
-      $matches[] = array(
-        'value' => '',
-        'label' => t('"@string" must have at least %min_chars characters.', array('@string' => $string, '%min_chars' => $expose_options['autocomplete_min_chars'])),
-      );
-      */
       return new JsonResponse($matches);
     }
 

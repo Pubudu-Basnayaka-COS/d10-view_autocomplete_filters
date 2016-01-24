@@ -20,7 +20,7 @@ use Drupal\views\Plugin\views\filter\StringFilter;
  */
 class ViewsAutocompleteFiltersString extends StringFilter {
 
-  // exposed filter options
+  // Exposed filter options.
   var $alwaysMultiple = TRUE;
 
   protected function defineOptions() {
@@ -61,7 +61,7 @@ class ViewsAutocompleteFiltersString extends StringFilter {
         $this->options['expose']['autocomplete_field'] = $this->options['id'];
       }
 
-      // Build form elements for the right side of the exposed filter form
+      // Build form elements for the right side of the exposed filter form.
       $states = array(
         'visible' => array('
             :input[name="options[expose][autocomplete_filter]"]' => array('checked' => TRUE),
