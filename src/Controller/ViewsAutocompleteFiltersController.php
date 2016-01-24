@@ -232,12 +232,9 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
     unset($view->row_index);
 
-    if (empty($matches)) {
-      $matches[] = [
-        'value' => '',
-        'label' => t('"@string" returned no results. Please try something else.', ['@string' => $string]),
-      ];
-    }
+    // @ToDo: No results message
+    // Follow https://www.drupal.org/node/2346973 issue when Drupal core will
+    // provide a solution for such messages.
 
     return new JsonResponse($matches);
   }
