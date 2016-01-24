@@ -148,8 +148,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
 
     // Get fields options and check field exists in this display.
     foreach ($field_names as $field_name) {
-      $fieldOptions = $view->getHandler($view_display, 'field', $field_name);
-      if (empty($fieldOptions)) {
+      $field_options = $view->getHandler($view_display, 'field', $field_name);
+      if (empty($field_options)) {
         // Field not exists, report about it to watchdog and return empty array.
         watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label not exists in view %view, display %display', array(
           '%label' => $expose_options['label'],
@@ -161,13 +161,13 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
     // Collect exposed filter values and set them to the view.
     if (!empty($expose_options['autocomplete_dependent'])) {
-      $exposedInput = $view->getExposedInput() ;
+      $exposed_input = $view->getExposedInput() ;
     }
     else {
-      $exposedInput = array();
+      $exposed_input = array();
     }
-    $exposedInput[$expose_options['identifier']] = $string;
-    $view->setExposedInput($exposedInput);
+    $exposed_input[$expose_options['identifier']] = $string;
+    $view->setExposedInput($exposed_input);
 
     // Disable cache for view, because caching autocomplete is a waste of time and memory.
     $display_handler->setOption('cache', array('type' => 'none'));
