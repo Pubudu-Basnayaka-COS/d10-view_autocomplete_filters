@@ -30,7 +30,7 @@ class ViewsAutocompleteFiltersCombine extends Combine {
     $options['expose']['contains'] += [
       'autocomplete_filter' => ['default' => 0],
       'autocomplete_min_chars' => ['default' => 0],
-      'autocomplete_items' => ['default' => 10),
+      'autocomplete_items' => ['default' => 10],
       'autocomplete_raw_suggestion' => ['default' => TRUE],
       'autocomplete_raw_dropdown' => ['default' => TRUE],
       'autocomplete_dependent' => ['default' => FALSE],
