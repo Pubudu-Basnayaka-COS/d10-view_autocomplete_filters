@@ -235,6 +235,10 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     // Follow https://www.drupal.org/node/2346973 issue when Drupal core will
     // provide a solution for such messages.
 
+    if (!empty($matches)) {
+      $matches = array_unique($matches, SORT_REGULAR);
+    }
+
     return new JsonResponse($matches);
   }
 
