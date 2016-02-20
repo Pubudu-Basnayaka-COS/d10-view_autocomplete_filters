@@ -95,7 +95,6 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       }
       $display_handler->setOption('arguments', $arguments);
     }
-    $matches = $view->result;
 
     // Get exposed filter options for our field.
     // Also, check if filter is exposed and autocomplete is enabled for this
