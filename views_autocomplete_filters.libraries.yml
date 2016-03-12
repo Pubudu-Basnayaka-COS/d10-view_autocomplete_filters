@@ -1,4 +1,4 @@
-drupal.views-autocomplete-filters:
+drupal.views-autocomplete-filters-dependent:
   version: VERSION
   js:
     js/views-autocomplete-filters-dependent.js: {}
