@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_autocomplete_filters\Controller\ViewsAutocompleteFiltersController.
- */
-
 namespace Drupal\views_autocomplete_filters\Controller;
 
 use Drupal\Component\Utility\Html;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views_autocomplete_filters\Plugin\views\filter\ViewsAutocompleteFiltersCombine.
- */
-
 namespace Drupal\views_autocomplete_filters\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;
