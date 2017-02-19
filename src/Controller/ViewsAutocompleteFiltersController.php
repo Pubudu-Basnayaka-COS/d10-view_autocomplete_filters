@@ -231,7 +231,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     // provide a solution for such messages.
 
     if (!empty($matches)) {
-      $matches = array_unique($matches, SORT_REGULAR);
+      $matches = array_values(array_unique($matches, SORT_REGULAR));
     }
 
     return new JsonResponse($matches);
