@@ -7,6 +7,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\views\Views;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,10 +19,28 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ViewsAutocompleteFiltersController implements ContainerInjectionInterface {
 
   /**
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+
+  /**
+   * ViewsAutocompleteFiltersController constructor.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   */
+  public function __construct(LoggerInterface $logger) {
+    $this->logger = $logger;
+  }
+
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static();
+    return new static(
+      $container->get('logger.factory')->get('views_autocomplete_filters')
+    );
   }
 
   /**
@@ -70,7 +89,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
    *   containing a failure message.
    */
   public function autocomplete(Request $request, $view_name, $view_display, $filter_name, $view_args) {
-    $matches = [];
+    $matches = $field_names = [];
     $string = $request->query->get('q');
     // Get view and execute.
     $view = Views::getView($view_name);
@@ -98,8 +117,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     if (empty($filters[$filter_name]['exposed']) || empty($filters[$filter_name]['expose']['autocomplete_filter'])) {
       throw new NotFoundHttpException();
     }
-    $filter = $filters[$filter_name];
-    $expose_options = $filter['expose'];
+    $current_filter = $filters[$filter_name];
+    $expose_options = $current_filter['expose'];
 
     // Do not filter if the string length is less that minimum characters setting.
     if (strlen(trim($string)) < $expose_options['autocomplete_min_chars']) {
@@ -107,20 +126,20 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
 
     // Determine fields which will be used for output.
-    if (empty($expose_options['autocomplete_field']) && !empty($filter['name']) ) {
-      if ($view->getHandler($display_name, 'field', $filters[$filter_name]['id'])) {
-        $field_names = [[$filter_name]['id']];
+    if (empty($expose_options['autocomplete_field']) && !empty($current_filter['id']) ) {
+      if ($view->getHandler($view->current_display, 'field', $current_filter['id'])) {
+        $field_names[] = $current_filter['id'];
         // force raw data for no autocomplete field defined.
         $expose_options['autocomplete_raw_suggestion'] = 1;
         $expose_options['autocomplete_raw_dropdown'] = 1;
       }
       else {
         // Field is not set, report about it to watchdog and return empty array.
-        watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label is not set in view %view, display %display', [
+        $this->logger->error('Field for autocomplete filter %label is not set in view %view, display %display', [
           '%label' => $expose_options['label'],
-          '%view' => $view->name,
-          '%display' => $display->id,
-        ], WATCHDOG_ERROR);
+          '%view' => $view->id(),
+          '%display' => $view->current_display,
+        ]);
         return new JsonResponse($matches);
       }
     }
@@ -129,8 +148,8 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       $field_names =[$expose_options['autocomplete_field']];
     }
     // For combine fields autocomplete filter.
-    elseif (!empty($filter['fields'])) {
-      $field_names = array_keys($filter['fields']);
+    elseif (!empty($current_filter['fields'])) {
+      $field_names = array_keys($current_filter['fields']);
     }
 
     // Get fields options and check field exists in this display.
@@ -138,11 +157,11 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
       $field_options = $view->getHandler($view_display, 'field', $field_name);
       if (empty($field_options)) {
         // Field not exists, report about it to watchdog and return empty array.
-        watchdog('views_autocomplete_filters', 'Field for autocomplete filter %label not exists in view %view, display %display', [
+        $this->logger->error('Field for autocomplete filter %label not exists in view %view, display %display', [
           '%label' => $expose_options['label'],
-          '%view' => $view->name,
-          '%display' => $display->id,
-        ], WATCHDOG_ERROR);
+          '%view' => $view->id(),
+          '%display' => $view->current_display,
+        ]);
         return new JsonResponse($matches);
       }
     }
