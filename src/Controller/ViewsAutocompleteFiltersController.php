@@ -126,9 +126,9 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
 
     // Determine fields which will be used for output.
-    if (empty($expose_options['autocomplete_field']) && !empty($current_filter['id']) ) {
-      if ($view->getHandler($view->current_display, 'field', $current_filter['id'])) {
-        $field_names[] = $current_filter['id'];
+    if (empty($expose_options['autocomplete_field']) && !empty($current_filter['name']) ) {
+      if ($view->getHandler($view->current_display, 'field', $filters[$filter_name]['id'])) {
+        $field_names = [[$filter_name]['id']];
         // force raw data for no autocomplete field defined.
         $expose_options['autocomplete_raw_suggestion'] = 1;
         $expose_options['autocomplete_raw_dropdown'] = 1;
