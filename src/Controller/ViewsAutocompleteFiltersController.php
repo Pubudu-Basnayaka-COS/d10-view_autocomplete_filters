@@ -208,6 +208,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     foreach ($view->result as $index => $row) {
       $view->row_index = $index;
       $rendered_field = $raw_field = '';
+      /** @var \Drupal\views\Plugin\views\style\StylePluginBase $style_plugin */
       $style_plugin = $display_handler->getPlugin('style');
   
       foreach ($field_names as $field_name) {
@@ -220,6 +221,13 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
           $raw_field = $style_plugin->getFieldValue($index, $field_name);
           if (!is_array($raw_field)) {
             $raw_field = [['value' => $raw_field]];
+          }
+          else {
+            $raw_field_items = $raw_field;
+            $raw_field = [];
+            foreach ($raw_field_items as $raw_field_item) {
+              $raw_field[] = ['value' => $raw_field_item];
+            }
           }
         }
   
