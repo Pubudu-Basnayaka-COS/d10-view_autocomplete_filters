@@ -18,6 +18,10 @@ function views_autocomplete_filters_views_data_alter(array &$data) {
       if (isset($field_data['filter']['id']) && $field_data['filter']['id'] == 'combine') {
         $data[$table_name][$field_name]['filter']['id'] = 'views_autocomplete_filters_combine';
       }
+      // Extend SearchApiText filter handler with autocomplete capabilities.
+      if (isset($field_data['filter']['id']) && $field_data['filter']['id'] == 'search_api_text') {
+        $data[$table_name][$field_name]['filter']['id'] = 'views_autocomplete_filters_search_api_text';
+      }
     }
   }
 }
