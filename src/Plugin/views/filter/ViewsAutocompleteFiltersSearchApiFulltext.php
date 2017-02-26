@@ -12,11 +12,18 @@ use Drupal\search_api\Plugin\views\filter\SearchApiFulltext;
  *
  * @ViewsFilter("views_autocomplete_filters_search_api_fulltext")
  */
-class ViewsAutocompleteFiltersSearchApiFulltext extends SearchApiFulltext {
+class ViewsAutocompleteFiltersSearchApiFulltext extends SearchApiFulltext implements ViewsAutocompleteFiltersInterface {
 
   // Exposed filter options.
   var $alwaysMultiple = TRUE;
 
   use ViewsAutocompleteFiltersTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasAutocompleteFieldSelector() {
+    return FALSE;
+  }
 
 }

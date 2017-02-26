@@ -23,6 +23,10 @@ trait ViewsAutocompleteFiltersTrait {
       'autocomplete_dependent' => ['default' => FALSE],
     ];
 
+    if (!$this->hasAutocompleteFieldSelector()) {
+      unset($options['expose']['contains']['autocomplete_field']);
+    }
+
     return $options;
   }
 
@@ -105,6 +109,9 @@ trait ViewsAutocompleteFiltersTrait {
           '#states' => $states,
         ],
       ];
+      if (!$this->hasAutocompleteFieldSelector()) {
+        unset($form['expose']['autocomplete_field']);
+      }
     }
   }
 
@@ -138,6 +145,13 @@ trait ViewsAutocompleteFiltersTrait {
       $form['#attached']['library'][] = 'views_autocomplete_filters/drupal.views-autocomplete-filters-dependent';
       $form['value']['#attributes']['class'][] = 'views-ac-dependent-filter';
     }
+  }
+
+  /**
+   * Autocomplete filters should have 'autocomplete_field' selector by default.
+   */
+  public function hasAutocompleteFieldSelector() {
+    return TRUE;
   }
 
 }

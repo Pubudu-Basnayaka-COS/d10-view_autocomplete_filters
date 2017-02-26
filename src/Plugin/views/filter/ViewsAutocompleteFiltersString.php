@@ -12,7 +12,7 @@ use Drupal\views\Plugin\views\filter\StringFilter;
  *
  * @ViewsFilter("views_autocomplete_filters_string")
  */
-class ViewsAutocompleteFiltersString extends StringFilter {
+class ViewsAutocompleteFiltersString extends StringFilter implements ViewsAutocompleteFiltersInterface {
 
   // Exposed filter options.
   var $alwaysMultiple = TRUE;

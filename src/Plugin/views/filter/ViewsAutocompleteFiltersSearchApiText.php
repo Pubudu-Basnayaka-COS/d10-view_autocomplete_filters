@@ -11,7 +11,7 @@ use Drupal\search_api\Plugin\views\filter\SearchApiText;
  *
  * @ViewsFilter("views_autocomplete_filters_search_api_text")
  */
-class ViewsAutocompleteFiltersSearchApiText extends SearchApiText {
+class ViewsAutocompleteFiltersSearchApiText extends SearchApiText implements ViewsAutocompleteFiltersInterface {
 
   // Exposed filter options.
   var $alwaysMultiple = TRUE;

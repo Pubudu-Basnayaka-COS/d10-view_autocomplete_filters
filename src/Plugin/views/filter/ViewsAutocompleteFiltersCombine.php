@@ -12,11 +12,18 @@ use Drupal\views\Plugin\views\filter\Combine;
  *
  * @ViewsFilter("views_autocomplete_filters_combine")
  */
-class ViewsAutocompleteFiltersCombine extends Combine {
+class ViewsAutocompleteFiltersCombine extends Combine implements ViewsAutocompleteFiltersInterface {
 
   // Exposed filter options.
   var $alwaysMultiple = TRUE;
 
   use ViewsAutocompleteFiltersTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasAutocompleteFieldSelector() {
+    return FALSE;
+  }
 
 }
