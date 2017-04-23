@@ -138,6 +138,11 @@ trait ViewsAutocompleteFiltersTrait {
       'view_args' => $view_args,
     ];
 
+    // Add JS script to expands the behaviour of the default autocompletion.
+    // Override the "select" option of the jQueryUI auto-complete for
+    // to make sure we do not use quotes for inputs with comma.
+    $form['#attached']['library'][] = 'views_autocomplete_filters/drupal.views-autocomplete-filters';
+
     // Add JS script with core autocomplete overrides to the end of JS files
     // list to be sure it is added after the "misc/autocomplete.js" file. Also
     // mark the field with special class.
