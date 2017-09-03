@@ -41,7 +41,7 @@ trait ViewsAutocompleteFiltersTrait {
       // Limit options to fields with the same name.
       /** @var \Drupal\views\Plugin\views\field\FieldHandlerInterface $handler */
       foreach ($this->view->display_handler->getHandlers('field') as $id => $handler) {
-        if ($handler->field == $this->realField) {
+        if ($handler->realField == $this->realField) {
           $field_options[$id] = $field_options_all[$id];
         }
       }
