@@ -208,11 +208,11 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     $view->row_index = 0;
     foreach ($view->result as $index => $row) {
       $view->row_index = $index;
-      $rendered_field = $raw_field = '';
       /** @var \Drupal\views\Plugin\views\style\StylePluginBase $style_plugin */
       $style_plugin = $display_handler->getPlugin('style');
   
       foreach ($field_names as $field_name) {
+        $rendered_field = $raw_field = '';
         // Render field only if suggestion or dropdown item not in RAW format.
         if (!$use_raw_suggestion || !$use_raw_dropdown) {
           $rendered_field = $style_plugin->getField($index, $field_name);
@@ -232,26 +232,28 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
           }
         }
   
-        if (empty($raw_field)) {
+        if (empty($raw_field) && !empty($rendered_field)) {
           $raw_field = [['value' => $rendered_field]];
         }
-        foreach ($raw_field as $delta => $item) {
-          if (isset($item['value']) && strstr(Unicode::strtolower($item['value']), Unicode::strtolower($string))) {
-            $dropdown = $use_raw_dropdown ? Html::escape($item['value']) : $rendered_field;
-            if ($dropdown != '') {
-              if ($use_raw_suggestion) {
-                $suggestion = Unicode::truncate(Html::escape($item['value']), 128);
-              }
-              else {
-                $suggestion = Unicode::truncate(Xss::filter($rendered_field, []), 128);
-              }
-              $suggestion = Html::decodeEntities($suggestion);
+        if (is_array($raw_field)) {
+          foreach ($raw_field as $delta => $item) {
+            if (isset($item['value']) && strstr(Unicode::strtolower($item['value']), Unicode::strtolower($string))) {
+              $dropdown = $use_raw_dropdown ? Html::escape($item['value']) : $rendered_field;
+              if ($dropdown != '') {
+                if ($use_raw_suggestion) {
+                  $suggestion = Unicode::truncate(Html::escape($item['value']), 128);
+                }
+                else {
+                  $suggestion = Unicode::truncate(Xss::filter($rendered_field, []), 128);
+                }
+                $suggestion = Html::decodeEntities($suggestion);
 
-              // Add a class wrapper for a few required CSS overrides.
-              $matches[] = [
-                'value' => $suggestion,
-                'label' => $dropdown,
-              ];
+                // Add a class wrapper for a few required CSS overrides.
+                $matches[] = [
+                  'value' => $suggestion,
+                  'label' => $dropdown,
+                ];
+              }
             }
           }
         }
