@@ -4,6 +4,7 @@ namespace Drupal\views_autocomplete_filters\Controller;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\views\Views;
@@ -238,7 +239,12 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
           if (isset($item['value']) && strstr(Unicode::strtolower($item['value']), Unicode::strtolower($string))) {
             $dropdown = $use_raw_dropdown ? Html::escape($item['value']) : $rendered_field;
             if ($dropdown != '') {
-              $suggestion = $use_raw_suggestion ? Html::escape($item['value']) : $rendered_field;
+              if ($use_raw_suggestion) {
+                $suggestion = Unicode::truncate(Html::escape($item['value']), 128);
+              }
+              else {
+                $suggestion = Unicode::truncate(Xss::filter($rendered_field, []), 128);
+              }
               $suggestion = Html::decodeEntities($suggestion);
 
               // Add a class wrapper for a few required CSS overrides.
