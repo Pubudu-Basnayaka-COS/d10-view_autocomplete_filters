@@ -66,17 +66,18 @@ trait ViewsAutocompleteFiltersTrait {
           '#description' => $this->t('Use Autocomplete for this filter.'),
         ],
         'autocomplete_items' => [
-          '#type' => 'textfield',
+          '#type' => 'number',
           '#title' => $this->t('Maximum number of items in Autocomplete'),
           '#default_value' => $this->options['expose']['autocomplete_items'],
           '#description' => $this->t('Enter 0 for no limit.'),
+          '#min' => 0,
           '#states' => $states,
         ],
         'autocomplete_min_chars' => [
-          '#type' => 'textfield',
+          '#type' => 'number',
           '#title' => t('Minimum number of characters to start filter'),
           '#default_value' => $this->options['expose']['autocomplete_min_chars'],
-          '#element_validate' => ['element_validate_integer'],
+          '#min' => 0,
           '#states' => $states,
         ],
         'autocomplete_dependent' => [
