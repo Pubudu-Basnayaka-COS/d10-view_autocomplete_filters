@@ -149,7 +149,13 @@
       if (Drupal.isDependent(this.element)) {
         var a = Drupal.serializeOuterForm(this.element);
         $.each(a, function (key, value) {
-          data_string.data[value['name']] = value['value'];
+          // We should have an array of values for element with multi values.
+          if (value['name'].indexOf('[]') > -1) {
+            if (!data_string.data[value['name']]) data_string.data[value['name']] = []
+            data_string.data[value['name']].push(value['value']);
+          } else {
+            data_string.data[value['name']] = value['value'];
+          }
         });
       }
       var options = $.extend(data_string, autocomplete.ajax);

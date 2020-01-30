@@ -7,6 +7,8 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\views\Plugin\views\display\DisplayPluginBase;
+use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -166,15 +168,9 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
         return new JsonResponse($matches);
       }
     }
+
     // Collect exposed filter values and set them to the view.
-    if (!empty($expose_options['autocomplete_dependent'])) {
-      $exposed_input = $view->getExposedInput() ;
-    }
-    else {
-      $exposed_input = [];
-    }
-    $exposed_input[$expose_options['identifier']] = $string;
-    $view->setExposedInput($exposed_input);
+    $view->setExposedInput($this->getExposedInput($view, $request, $expose_options));
 
     // Disable cache for view, because caching autocomplete is a waste of time and memory.
     $display_handler->setOption('cache', ['type' => 'none']);
@@ -270,6 +266,43 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
     }
 
     return new JsonResponse($matches);
+  }
+
+  /**
+   * Collect exposed filter values for setting them to the view.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   The view.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param array $expose_options
+   *   The options for the exposed filter.
+   *
+   * @return array|string[]
+   *   The exposed input.
+   */
+  protected function getExposedInput(ViewExecutable $view, Request $request, array $expose_options) {
+    $display_handler = $view->display_handler;
+    $filters = $display_handler->getOption('filters');
+
+    if (!empty($expose_options['autocomplete_dependent'])) {
+      $exposed_input = $view->getExposedInput();
+    }
+    else {
+      $exposed_input = [];
+      // Need to reset the default values for exposed filters.
+      foreach ($display_handler->getOption('filters') as $name => $filter) {
+        if (!empty($filters[$name]['exposed'])) {
+          if (!empty($filter['is_grouped'])) {
+            $filters[$name]['group_info']['default_group'] = 'All';
+          }
+          $filters[$name]['value'] = [];
+        }
+      }
+      $display_handler->setOption('filters', $filters);
+    }
+    $exposed_input[$expose_options['identifier']] = $request->query->get('q');
+    return $exposed_input;
   }
 
 }
