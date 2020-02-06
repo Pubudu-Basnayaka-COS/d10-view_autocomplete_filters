@@ -237,7 +237,7 @@ class ViewsAutocompleteFiltersController implements ContainerInjectionInterface 
         }
         if (is_array($raw_field)) {
           foreach ($raw_field as $delta => $item) {
-            if (isset($item['value']) && strstr(Unicode::strtolower($item['value']), Unicode::strtolower($string))) {
+            if (isset($item['value']) && strstr(mb_strtolower($item['value']), mb_strtolower($string))) {
               $dropdown = $use_raw_dropdown ? Html::escape($item['value']) : $rendered_field;
               if ($dropdown != '') {
                 if ($use_raw_suggestion) {
