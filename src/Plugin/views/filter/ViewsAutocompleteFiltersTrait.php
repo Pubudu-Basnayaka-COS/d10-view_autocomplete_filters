@@ -68,7 +68,7 @@ trait ViewsAutocompleteFiltersTrait {
       ],
       'autocomplete_min_chars' => [
         '#type' => 'number',
-        '#title' => t('Minimum number of characters to start filter'),
+        '#title' => $this->t('Minimum number of characters to start filter'),
         '#default_value' => $this->options['expose']['autocomplete_min_chars'],
         '#min' => 0,
         '#states' => $states,
